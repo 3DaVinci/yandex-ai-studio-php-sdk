@@ -2,6 +2,8 @@
 
 namespace AIStudio;
 
+use AIStudio\Resources\Embedding;
+use AIStudio\Resources\Tokenize;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -34,5 +36,15 @@ class Client
     public function getFolderId(): string
     {
         return $this->folderId;
+    }
+
+    public function embedding(): Embedding
+    {
+        return new Embedding($this);
+    }
+
+    public function tokenize(): Tokenize
+    {
+        return new Tokenize($this);
     }
 }
