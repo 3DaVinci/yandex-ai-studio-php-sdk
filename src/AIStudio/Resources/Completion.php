@@ -8,13 +8,14 @@ use AIStudio\Models\CompletionResponse;
 use AIStudio\Models\Message;
 use AIStudio\Exceptions\ApiException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class Completion
 {
-    private const ENDPOINT = '/foundationModels/v1/completion';
+    private const string ENDPOINT = '/foundationModels/v1/completion';
     
     public function __construct(
         private Client $client
@@ -50,6 +51,8 @@ class Completion
             return CompletionResponse::fromArray($data);
         } catch (TransportExceptionInterface | ClientExceptionInterface | ServerExceptionInterface | RedirectionExceptionInterface $e) {
             throw new ApiException('Failed to create completion: ' . $e->getMessage(), $e->getCode(), $e);
+        } catch (DecodingExceptionInterface $e) {
+            throw new ApiException('Failed to decode response: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }
