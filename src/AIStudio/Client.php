@@ -2,6 +2,7 @@
 
 namespace AIStudio;
 
+use AIStudio\Resources\Completion;
 use AIStudio\Resources\Embedding;
 use AIStudio\Resources\Tokenize;
 use Symfony\Component\HttpClient\HttpClient;
@@ -46,5 +47,10 @@ class Client
     public function tokenize(): Tokenize
     {
         return new Tokenize($this);
+    }
+
+    public function completion(): Completion
+    {
+        return new Completion($this);
     }
 }

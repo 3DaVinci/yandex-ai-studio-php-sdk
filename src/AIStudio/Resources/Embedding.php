@@ -24,15 +24,17 @@ class Embedding
      *
      * @param string $modelUri
      * @param string $text
+     * @param int $dimension
      * @return EmbeddingResponse
      * @throws ApiException
      */
-    public function create(string $modelUri, string $text): EmbeddingResponse
+    public function create(string $modelUri, string $text, int $dimension): EmbeddingResponse
     {
         try {
             $payload = [
                 'modelUri' => $modelUri,
                 'text' => $text,
+                'dim' => $dimension
             ];
 
             $response = $this->client->getHttpClient()->request('POST', self::ENDPOINT, [
