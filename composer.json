@@ -1,6 +1,6 @@
 {
   "name": "3davinci/yandex-ai-studio-php-sdk",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "version": "0.1.0",
   "description": "Yandex AI Studio PHP SDK",
   "type": "library",
