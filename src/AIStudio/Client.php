@@ -9,7 +9,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Client
 {
-    private const string API_BASE_URL = 'https://llm.api.cloud.yandex.net';
+    private const API_BASE_URL = 'https://llm.api.cloud.yandex.net';
     
     private HttpClientInterface $httpClient;
     private string $apiKey;

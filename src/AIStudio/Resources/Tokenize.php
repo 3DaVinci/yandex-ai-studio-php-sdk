@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 
 class Tokenize
 {
-    private const string ENDPOINT = '/foundationModels/v1/tokenize';
+    private const ENDPOINT = '/foundationModels/v1/tokenize';
 
     public function __construct(
         private Client $client

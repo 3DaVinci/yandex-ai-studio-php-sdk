@@ -15,7 +15,7 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class Completion
 {
-    private const string ENDPOINT = '/foundationModels/v1/completion';
+    private const ENDPOINT = '/foundationModels/v1/completion';
     
     public function __construct(
         private Client $client

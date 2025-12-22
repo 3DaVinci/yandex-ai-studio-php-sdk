@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class Embedding
 {
-    private const string ENDPOINT = '/foundationModels/v1/textEmbedding';
+    private const ENDPOINT = '/foundationModels/v1/textEmbedding';
 
     public function __construct(
         private Client $client
