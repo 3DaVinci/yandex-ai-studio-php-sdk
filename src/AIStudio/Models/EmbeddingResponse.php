@@ -2,7 +2,9 @@
 
 namespace AIStudio\Models;
 
-class EmbeddingResponse
+use AIStudio\Contracts\EmbeddingResponseInterface;
+
+class EmbeddingResponse implements EmbeddingResponseInterface
 {
     public function __construct(
         private array $embedding,
@@ -15,7 +17,17 @@ class EmbeddingResponse
         return $this->embedding;
     }
 
+    public function getEmbeddings(): array
+    {
+        return $this->embedding;
+    }
+
     public function getNumTokens(): int
+    {
+        return $this->numTokens;
+    }
+
+    public function getTotalTokens(): int
     {
         return $this->numTokens;
     }
@@ -23,6 +35,20 @@ class EmbeddingResponse
     public function getModelVersion(): string
     {
         return $this->modelVersion;
+    }
+
+    public function getModel(): string
+    {
+        return $this->modelVersion;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'embedding' => $this->embedding,
+            'numTokens' => $this->numTokens,
+            'modelVersion' => $this->modelVersion,
+        ];
     }
 
     public static function fromArray(array $data): self

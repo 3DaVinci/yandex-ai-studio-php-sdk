@@ -2,11 +2,18 @@
 
 namespace AIStudio\Tests\Unit\Models;
 
+use AIStudio\Contracts\CompletionResponseInterface;
 use AIStudio\Models\CompletionResponse;
 use PHPUnit\Framework\TestCase;
 
 class CompletionResponseTest extends TestCase
 {
+    public function testImplementsInterface(): void
+    {
+        $response = new CompletionResponse([], 'v1');
+
+        $this->assertInstanceOf(CompletionResponseInterface::class, $response);
+    }
     public function testCompletionResponseCreation(): void
     {
         $result = [
@@ -86,7 +93,10 @@ class CompletionResponseTest extends TestCase
 
         $response = new CompletionResponse(['usage' => $usage], 'v1');
 
-        $this->assertEquals($usage, $response->getUsage());
+        $normalized = $response->getUsage();
+        $this->assertEquals(10, $normalized['prompt_tokens']);
+        $this->assertEquals(5, $normalized['completion_tokens']);
+        $this->assertEquals(15, $normalized['total_tokens']);
     }
 
     public function testGetTextReturnsNullWhenNoAlternatives(): void

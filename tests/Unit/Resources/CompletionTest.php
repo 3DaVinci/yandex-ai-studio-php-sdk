@@ -3,8 +3,11 @@
 namespace AIStudio\Tests\Unit\Resources;
 
 use AIStudio\Client;
+use AIStudio\Contracts\CompletionResponseInterface;
+use AIStudio\Enums\ModelType;
 use AIStudio\Resources\Completion;
 use AIStudio\Models\CompletionResponse;
+use AIStudio\Models\OpenAI\OpenAICompletionResponse;
 use AIStudio\Models\Message;
 use AIStudio\Models\CompletionOptions;
 use AIStudio\Exceptions\ApiException;
@@ -14,7 +17,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 class CompletionTest extends TestCase
 {
-    public function testCreateCompletionSuccess(): void
+    public function testCreateCompletionStandardSuccess(): void
     {
         $responseData = [
             'result' => [
@@ -48,15 +51,24 @@ class CompletionTest extends TestCase
 
         $response = $completion->create(
             'gpt://test-folder/yandexgpt/latest',
-            $messages
+            $messages,
+            null,
+            ModelType::STANDARD
         );
 
         $this->assertInstanceOf(CompletionResponse::class, $response);
+        $this->assertInstanceOf(CompletionResponseInterface::class, $response);
         $this->assertEquals('Hello! How can I help you?', $response->getText());
         $this->assertEquals($responseData['modelVersion'], $response->getModelVersion());
+        $this->assertEquals($responseData['modelVersion'], $response->getModel());
+
+        $usage = $response->getUsage();
+        $this->assertEquals(10, $usage['prompt_tokens']);
+        $this->assertEquals(8, $usage['completion_tokens']);
+        $this->assertEquals(18, $usage['total_tokens']);
     }
 
-    public function testCreateCompletionWithOptions(): void
+    public function testCreateCompletionStandardWithOptions(): void
     {
         $responseData = [
             'result' => [
@@ -67,6 +79,11 @@ class CompletionTest extends TestCase
                             'text' => 'Response text',
                         ],
                     ],
+                ],
+                'usage' => [
+                    'inputTextTokens' => 5,
+                    'completionTokens' => 3,
+                    'totalTokens' => 8,
                 ],
             ],
             'modelVersion' => 'v1',
@@ -88,6 +105,103 @@ class CompletionTest extends TestCase
         );
 
         $this->assertInstanceOf(CompletionResponse::class, $response);
+        $this->assertInstanceOf(CompletionResponseInterface::class, $response);
+    }
+
+    public function testCreateCompletionOpenAISuccess(): void
+    {
+        $responseData = [
+            'id' => 'chatcmpl-123',
+            'object' => 'chat.completion',
+            'created' => 1677652288,
+            'model' => 'yandexgpt/latest',
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => [
+                        'role' => 'assistant',
+                        'content' => 'Hello! How can I help you?',
+                    ],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+            'usage' => [
+                'prompt_tokens' => 10,
+                'completion_tokens' => 8,
+                'total_tokens' => 18,
+            ],
+        ];
+
+        $mockResponse = new MockResponse(json_encode($responseData));
+        $mockHttpClient = new MockHttpClient($mockResponse);
+
+        $client = new Client('test-api-key', 'test-folder-id', $mockHttpClient);
+        $completion = new Completion($client);
+
+        $messages = [
+            ['role' => 'user', 'content' => 'Hello'],
+        ];
+
+        $response = $completion->create(
+            'yandexgpt/latest',
+            $messages,
+            ['temperature' => 0.7],
+            ModelType::OPENAI_COMPATIBLE
+        );
+
+        $this->assertInstanceOf(OpenAICompletionResponse::class, $response);
+        $this->assertInstanceOf(CompletionResponseInterface::class, $response);
+        $this->assertEquals('Hello! How can I help you?', $response->getText());
+        $this->assertEquals('yandexgpt/latest', $response->getModel());
+
+        $usage = $response->getUsage();
+        $this->assertEquals(10, $usage['prompt_tokens']);
+        $this->assertEquals(8, $usage['completion_tokens']);
+        $this->assertEquals(18, $usage['total_tokens']);
+    }
+
+    public function testCreateCompletionOpenAIWithMessageObjects(): void
+    {
+        $responseData = [
+            'id' => 'chatcmpl-456',
+            'object' => 'chat.completion',
+            'created' => 1677652288,
+            'model' => 'yandexgpt/latest',
+            'choices' => [
+                [
+                    'index' => 0,
+                    'message' => [
+                        'role' => 'assistant',
+                        'content' => 'Test response',
+                    ],
+                    'finish_reason' => 'stop',
+                ],
+            ],
+            'usage' => [
+                'prompt_tokens' => 5,
+                'completion_tokens' => 3,
+                'total_tokens' => 8,
+            ],
+        ];
+
+        $mockResponse = new MockResponse(json_encode($responseData));
+        $mockHttpClient = new MockHttpClient($mockResponse);
+
+        $client = new Client('test-api-key', 'test-folder-id', $mockHttpClient);
+        $completion = new Completion($client);
+
+        // Test with Message objects
+        $messages = [new Message('user', 'Test')];
+
+        $response = $completion->create(
+            'yandexgpt/latest',
+            $messages,
+            [],
+            ModelType::OPENAI_COMPATIBLE
+        );
+
+        $this->assertInstanceOf(OpenAICompletionResponse::class, $response);
+        $this->assertEquals('Test response', $response->getText());
     }
 
     public function testCreateCompletionFailure(): void
